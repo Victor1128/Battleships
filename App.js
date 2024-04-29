@@ -12,7 +12,7 @@ import authStorage from "./app/auth/storage";
 import UserDetails from "./app/screens/UserDetails";
 import LandingPage from "./app/screens/LandingPage";
 
-// SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
   const [user, setUser] = useState();
@@ -38,8 +38,8 @@ export default function App() {
         // performed layout.
         await SplashScreen.hideAsync();
       }
-      hideSplash();
     }
+    hideSplash();
   }, [isReady]);
 
   if (!isReady) {
