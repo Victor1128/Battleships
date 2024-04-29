@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useContext } from "react";
 import * as Yup from "yup";
 import { useState } from "react";
+import { jwtDecode } from "jwt-decode";
+import "core-js/stable/atob";
 
 import SafeView from "../components/SafeView";
 
@@ -11,6 +13,7 @@ import {
   ErrorMessage,
 } from "../components/forms";
 import auth from "../api/auth";
+import AuthContext from "../auth/context";
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().required().email().label("Email"),
@@ -18,6 +21,7 @@ const validationSchema = Yup.object().shape({
 });
 
 export default function LoginScreen() {
+  const authContext = useContext(AuthContext);
   [errorVisible, setErrorVisible] = useState(false);
   [errorMessage, setErrorMessage] = useState("");
 
@@ -28,7 +32,8 @@ export default function LoginScreen() {
       setErrorVisible(true);
     } else {
       setErrorVisible(false);
-      console.log(result.data.accessToken);
+      const user = jwtDecode(result.data.accessToken);
+      authContext.setUser(user);
     }
   };
 

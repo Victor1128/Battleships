@@ -10,7 +10,7 @@ const Stack = createStackNavigator();
 const AuthNavigator = () => (
   <Stack.Navigator>
     <Stack.Screen
-      name="Welcome"
+      name="LandingPage"
       component={LandingPage}
       options={{ headerShown: false }}
     />
