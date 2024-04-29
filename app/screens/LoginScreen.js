@@ -1,9 +1,16 @@
 import React from "react";
 import * as Yup from "yup";
+import { useState } from "react";
 
 import SafeView from "../components/SafeView";
 
-import {AppForm, AppFormField, SubmitButton} from '../components/forms'
+import {
+  AppForm,
+  AppFormField,
+  SubmitButton,
+  ErrorMessage,
+} from "../components/forms";
+import auth from "../api/auth";
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().required().email().label("Email"),
@@ -11,13 +18,31 @@ const validationSchema = Yup.object().shape({
 });
 
 export default function LoginScreen() {
+  [errorVisible, setErrorVisible] = useState(false);
+  [errorMessage, setErrorMessage] = useState("");
+
+  const handleSubmit = async ({ email, password }) => {
+    const result = await auth.login(email, password);
+    if (!result.ok) {
+      setErrorMessage(result.data.message);
+      setErrorVisible(true);
+    } else {
+      setErrorVisible(false);
+      console.log(result.data.accessToken);
+    }
+  };
+
   return (
     <SafeView>
       <AppForm
         initialValues={{ email: "", password: "" }}
-        onSubmit={(values) => console.log(values)}
+        onSubmit={handleSubmit}
         validationSchema={validationSchema}
       >
+        <ErrorMessage
+          error="Invalid email and/or password."
+          visible={errorVisible}
+        />
         <AppFormField
           name="email"
           icon="email"
@@ -26,18 +51,9 @@ export default function LoginScreen() {
           keyboardType="email-address"
           placeholder="Email"
         />
-        <AppFormField
-          name="password"
-          placeholder="Password"
-          icon="lock"
-          secureTextEntry
-        />
+        <AppFormField name="password" isPassword placeholder="Password" />
         <SubmitButton title="Login" />
       </AppForm>
     </SafeView>
   );
 }
-
-const styles = StyleSheet.create({
-  textInput: {},
-});
