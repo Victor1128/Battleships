@@ -3,8 +3,8 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import UserDetails from "../screens/UserDetails";
-import Games from "../screens/Games";
 import GameNavigator from "./GameNavigator";
+import CurrentGamesNavigator from "./CurrentGamesNavigator";
 // import CurrentGames from "../screens/CurrentGames";
 const Tab = createBottomTabNavigator();
 
@@ -15,7 +15,7 @@ const AuthNavigator = () => (
   >
     <Tab.Screen
       name="Your Games"
-      component={Games}
+      component={CurrentGamesNavigator}
       options={{
         tabBarIcon: ({ color, size }) => (
           <MaterialCommunityIcons name="home" color={color} size={size} />

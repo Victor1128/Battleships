@@ -20,6 +20,7 @@ export default function GameElement({
   player2Email,
   status,
   onPress,
+  hasPlayButton,
 }) {
   return (
     <View style={styles.container}>
@@ -34,9 +35,9 @@ export default function GameElement({
       <View style={styles.statusContainer}>
         <AppText>{status}</AppText>
       </View>
-      {!player2Email && (
+      {hasPlayButton && (
         <TouchableOpacity style={styles.button} onPress={onPress}>
-          <AppText>Join</AppText>
+          <AppText>Play</AppText>
         </TouchableOpacity>
       )}
     </View>

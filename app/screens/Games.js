@@ -1,7 +1,5 @@
 import {
   View,
-  Text,
-  ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
@@ -9,13 +7,10 @@ import React, { useEffect, useState } from "react";
 
 import gamesApi from "../api/game";
 import SafeView from "../components/SafeView";
-import GameElement from "../components/GameElement";
 import AppText from "../components/AppText";
-import AppButton from "../components/AppButton";
-import { FlatList } from "react-native-gesture-handler";
-import ListItemSeparator from "../components/ListItemSeparator";
 import AppTextInput from "../components/AppTextInput";
 import colors from "../config/colors";
+import ListGames from "../components/ListGames";
 
 export default function Games() {
   const [loading, setLoading] = useState(false);
@@ -91,50 +86,18 @@ export default function Games() {
           <AppText>Open Games</AppText>
         </TouchableOpacity>
       </View>
-      {error && (
-        <>
-          <AppText>Error loading games</AppText>
-          <AppButton title="Retry" onPress={getGames} />
-        </>
-      )}
-      <FlatList
-        data={games}
-        keyExtractor={(item) => item.id}
-        ItemSeparatorComponent={ListItemSeparator}
-        initialNumToRender={10}
-        renderItem={({ item }) => (
-          <GameElement
-            player1Email={item.player1Id && item.player1.email}
-            player2Email={item.player2Id && item.player2.email}
-            status={item.status}
-            onPress={() => console.log(item.id)}
-          />
-        )}
+      <ListGames
+        error={error}
+        games={games}
+        loading={loading}
+        getGames={getGames}
+        playButtonCondition={(item) => !item.player2}
       />
-      {loading && (
-        <View style={styles.loading}>
-          <ActivityIndicator size="large" />
-        </View>
-      )}
     </SafeView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loading: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   filterContainer: {
     flexDirection: "row",
     justifyContent: "space-evenly",
