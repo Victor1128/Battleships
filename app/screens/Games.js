@@ -1,8 +1,4 @@
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 
 import gamesApi from "../api/game";

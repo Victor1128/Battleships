@@ -1,10 +1,7 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import React from "react";
+
+import AuthScreen from "../components/AuthScreen";
 
 export default function RegisterScreen() {
-  return (
-    <View>
-      <Text>RegisterScreen</Text>
-    </View>
-  )
+  return <AuthScreen isRegister />;
 }
