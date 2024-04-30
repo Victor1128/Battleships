@@ -4,11 +4,15 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import UserDetails from "../screens/UserDetails";
 import Games from "../screens/Games";
+import GameNavigator from "./GameNavigator";
 // import CurrentGames from "../screens/CurrentGames";
 const Tab = createBottomTabNavigator();
 
 const AuthNavigator = () => (
-  <Tab.Navigator initialRouteName="Account">
+  <Tab.Navigator
+    initialRouteName="Games"
+    screenOptions={{ headerShown: false }}
+  >
     <Tab.Screen
       name="Your Games"
       component={Games}
@@ -19,8 +23,8 @@ const AuthNavigator = () => (
       }}
     />
     <Tab.Screen
-      name="All Games"
-      component={Games}
+      name="Games"
+      component={GameNavigator}
       options={{
         tabBarIcon: ({ color, size }) => (
           <MaterialCommunityIcons name="ship-wheel" color={color} size={size} />

@@ -10,7 +10,7 @@ import AppNavigator from "./app/navigation/AppNavigator";
 import authStorage from "./app/auth/storage";
 import UserDetails from "./app/screens/UserDetails";
 import LandingPage from "./app/screens/LandingPage";
-import authApi from './app/api/auth'
+import authApi from "./app/api/auth";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -20,9 +20,9 @@ export default function App() {
 
   const restoreUser = async () => {
     const token = await authStorage.getToken();
-    if (token){
-      authApi.setAuthToken(token)
-      setUser(jwtDecode(token))
+    if (token) {
+      authApi.setAuthToken(token);
+      setUser(jwtDecode(token));
     }
     setIsReady(true);
   };
