@@ -31,13 +31,14 @@ export default function GameElement({
         <TextWithIcon icon={"account"} text={player1Email} />
         <TextWithIcon icon={"account"} text={player2Email} />
       </View>
-      <View style={styles.playersContainer}>
-        <AppText>Game Status: </AppText>
+      <View style={styles.statusContainer}>
         <AppText>{status}</AppText>
       </View>
-      <TouchableOpacity style={styles.button} onPress={onPress}>
-        <AppText>Join</AppText>
-      </TouchableOpacity>
+      {!player2Email && (
+        <TouchableOpacity style={styles.button} onPress={onPress}>
+          <AppText>Join</AppText>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -46,7 +47,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.light,
     flexDirection: "row",
-    padding: 15,
+    padding: 10,
     borderRadius: 30,
   },
   image: {
@@ -58,6 +59,11 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     overflow: "hidden",
     flex: 1,
+  },
+  statusContainer: {
+    flex: 0.5,
+    justifyContent: "center",
+    marginLeft: 10,
   },
   playerNameContainer: {
     flexDirection: "row",

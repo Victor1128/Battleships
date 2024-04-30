@@ -23,6 +23,8 @@ export default function Games() {
   const [allGames, setAllGames] = useState([]);
   const [openGames, setOpenGames] = useState([]);
   const [error, setError] = useState(false);
+  const [isAllGames, setIsAllGames] = useState(true);
+  const [searchText, setSearchText] = useState("");
 
   const getGames = async () => {
     setLoading(true);
@@ -34,9 +36,26 @@ export default function Games() {
     setLoading(false);
   };
 
-  const filterGames = (gamesList) => {
-    setGames(gamesList);
+  const filterGamesByText = (gamesList) => {
+    return gamesList.filter(
+      (game) =>
+        game.player1.email.toLowerCase().includes(searchText.toLowerCase()) ||
+        (game.player2 &&
+          game.player2.email.toLowerCase().includes(searchText.toLowerCase()))
+    );
   };
+
+  const filterGames = (gamesList) => {
+    setLoading(true);
+    gamesList = filterGamesByText(gamesList);
+    setGames(gamesList);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    const localGames = isAllGames ? allGames : openGames;
+    filterGames(localGames);
+  }, [searchText]);
 
   useEffect(() => {
     getGames();
@@ -44,17 +63,30 @@ export default function Games() {
 
   return (
     <SafeView>
-      <AppTextInput icon="magnify" placeholder="Player email" />
+      <AppTextInput
+        icon="magnify"
+        placeholder="Player email"
+        //onChangeText={(text) => handleSearch(text)}
+        onSubmitEditing={(value) => setSearchText(value.nativeEvent.text)}
+      />
       <View style={styles.filterContainer}>
         <TouchableOpacity
           style={styles.filterButton}
-          onPress={() => filterGames(allGames)}
+          onPress={() => {
+            if (isAllGames) return;
+            setIsAllGames(true);
+            filterGames(allGames);
+          }}
         >
           <AppText>All Games</AppText>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.filterButton}
-          onPress={() => filterGames(openGames)}
+          onPress={() => {
+            if (!isAllGames) return;
+            setIsAllGames(false);
+            filterGames(openGames);
+          }}
         >
           <AppText>Open Games</AppText>
         </TouchableOpacity>
@@ -69,6 +101,7 @@ export default function Games() {
         data={games}
         keyExtractor={(item) => item.id}
         ItemSeparatorComponent={ListItemSeparator}
+        initialNumToRender={10}
         renderItem={({ item }) => (
           <GameElement
             player1Email={item.player1Id && item.player1.email}
