@@ -1,4 +1,10 @@
-import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 
 import gamesApi from "../api/game";
@@ -9,10 +15,13 @@ import AppButton from "../components/AppButton";
 import { FlatList } from "react-native-gesture-handler";
 import ListItemSeparator from "../components/ListItemSeparator";
 import AppTextInput from "../components/AppTextInput";
+import colors from "../config/colors";
 
 export default function Games() {
   const [loading, setLoading] = useState(false);
   const [games, setGames] = useState([]);
+  const [allGames, setAllGames] = useState([]);
+  const [openGames, setOpenGames] = useState([]);
   const [error, setError] = useState(false);
 
   const getGames = async () => {
@@ -20,29 +29,42 @@ export default function Games() {
     const result = await gamesApi.getGames();
     setError(!result.ok);
     setGames(result.data.games);
+    setAllGames(result.data.games);
+    setOpenGames(result.data.games.filter((game) => game.status === "CREATED"));
     setLoading(false);
   };
 
+  const filterGames = (gamesList) => {
+    setGames(gamesList);
+  };
+
   useEffect(() => {
-    console.log(gamesApi);
     getGames();
   }, []);
 
   return (
     <SafeView>
       <AppTextInput icon="magnify" placeholder="Player email" />
-      {loading && (
-        <View style={styles.loading}>
-          <ActivityIndicator size="large" />
-        </View>
-      )}
+      <View style={styles.filterContainer}>
+        <TouchableOpacity
+          style={styles.filterButton}
+          onPress={() => filterGames(allGames)}
+        >
+          <AppText>All Games</AppText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.filterButton}
+          onPress={() => filterGames(openGames)}
+        >
+          <AppText>Open Games</AppText>
+        </TouchableOpacity>
+      </View>
       {error && (
         <>
           <AppText>Error loading games</AppText>
           <AppButton title="Retry" onPress={getGames} />
         </>
       )}
-
       <FlatList
         data={games}
         keyExtractor={(item) => item.id}
@@ -56,6 +78,11 @@ export default function Games() {
           />
         )}
       />
+      {loading && (
+        <View style={styles.loading}>
+          <ActivityIndicator size="large" />
+        </View>
+      )}
     </SafeView>
   );
 }
@@ -72,6 +99,18 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  filterContainer: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    marginVertical: 20,
+  },
+  filterButton: {
+    backgroundColor: colors.primary,
+    padding: 10,
+    borderRadius: 25,
     alignItems: "center",
     justifyContent: "center",
   },
