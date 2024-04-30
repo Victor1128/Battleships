@@ -11,9 +11,12 @@ const setAuthToken = (accessToken) =>
 
 const removeAuthToken = () => apiClient.deleteHeader("Authorization");
 
+const getUserDetails = () => apiClient.get("/user/details/me");
+
 export default {
   login,
   register,
   setAuthToken,
   removeAuthToken,
+  getUserDetails,
 };
