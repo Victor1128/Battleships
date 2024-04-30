@@ -21,9 +21,16 @@ export default function Games() {
     setLoading(true);
     const result = await gamesApi.getGames();
     setError(!result.ok);
-    setGames(result.data.games);
-    setAllGames(result.data.games);
-    setOpenGames(result.data.games.filter((game) => game.status === "CREATED"));
+    if (result.ok) {
+      setAllGames(result.data.games);
+      setOpenGames(
+        result.data.games.filter((game) => game.status === "CREATED")
+      );
+      const localGames = isAllGames
+        ? result.data.games
+        : result.data.games.filter((game) => game.status === "CREATED");
+      setGames(filterGamesByText(localGames));
+    }
     setLoading(false);
   };
 

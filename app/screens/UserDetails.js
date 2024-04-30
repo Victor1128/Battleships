@@ -13,6 +13,7 @@ export default function UserDetails() {
   const [user, setUser] = useState();
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const authContext = useContext(AuthContext);
   const handleLogout = () => {
     authStorage.deleteToken();
     authContext.setUser(null);

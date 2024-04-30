@@ -1,12 +1,20 @@
 import { View, FlatList, ActivityIndicator, StyleSheet } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 
 import AppText from "./AppText";
 import AppButton from "./AppButton";
 import GameElement from "./GameElement";
 import ListItemSeparator from "./ListItemSeparator";
 
-export default function ListGames({ error, loading, games, getGames, playButtonCondition }) {
+export default function ListGames({
+  error,
+  loading,
+  games,
+  getGames,
+  playButtonCondition,
+}) {
+  const [refreshing, setRefreshing] = useState(false);
+
   return (
     <>
       {error && (
@@ -18,7 +26,6 @@ export default function ListGames({ error, loading, games, getGames, playButtonC
       <FlatList
         data={games}
         keyExtractor={(item) => item.id}
-        ItemSeparatorComponent={ListItemSeparator}
         initialNumToRender={10}
         renderItem={({ item }) => (
           <GameElement
@@ -29,6 +36,9 @@ export default function ListGames({ error, loading, games, getGames, playButtonC
             hasPlayButton={playButtonCondition(item)}
           />
         )}
+        ItemSeparatorComponent={ListItemSeparator}
+        refreshing={refreshing}
+        onRefresh={getGames}
       />
       {loading && (
         <View style={styles.loading}>
