@@ -36,7 +36,7 @@ export default function ListGames({
             player1Email={item.player1Id && item.player1.email}
             player2Email={item.player2Id && item.player2.email}
             status={item.status}
-            onPress={() => onPress(item.id)}
+            onPress={() => onPress(item)}
             hasPlayButton={playButtonCondition(item)}
           />
         )}

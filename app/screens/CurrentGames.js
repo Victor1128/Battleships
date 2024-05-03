@@ -15,8 +15,11 @@ export default function CurrentGames() {
   const [loading, setLoading] = useState(false);
   const { user } = useContext(AuthContext);
 
-  const handlePlay = (gameId) => {
-    navigation.navigate("Game Details", { gameId });
+  const handlePlay = ({id, status}) => {
+    navigation.navigate(
+      status === "MAP_CONFIG" ? "Configure Map" : "Gameplay",
+      { id }
+    );
   };
 
   const getGames = async () => {

@@ -21,16 +21,16 @@ export default function Games() {
   const [isAllGames, setIsAllGames] = useState(true);
   const [searchText, setSearchText] = useState("");
 
-  const handleJoinGame = async (gameId) => {
+  const handleJoinGame = async ({ id }) => {
     setLoading(true);
-    const result = await gamesApi.joinGame(gameId);
+    const result = await gamesApi.joinGame(id);
     setError(!result.ok);
-    if (!result.ok) setErrorMessage(result.data);
+    if (!result.ok) setErrorMessage(result.data.message);
     else {
       console.log({
-        gameId,
+        id,
       });
-      navigation.navigate("Game Details", { gameId });
+      navigation.navigate("Configure Map", { id });
     }
     setLoading(false);
   };
@@ -48,7 +48,7 @@ export default function Games() {
         ? result.data.games
         : result.data.games.filter((game) => game.status === "CREATED");
       setGames(filterGamesByText(localGames));
-    } else setErrorMessage(result.data);
+    } else setErrorMessage(result.data.message);
     setLoading(false);
   };
 
