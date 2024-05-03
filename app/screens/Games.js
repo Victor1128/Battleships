@@ -1,5 +1,6 @@
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 
 import gamesApi from "../api/game";
 import SafeView from "../components/SafeView";
@@ -7,8 +8,10 @@ import AppText from "../components/AppText";
 import AppTextInput from "../components/AppTextInput";
 import colors from "../config/colors";
 import ListGames from "../components/ListGames";
+import { ref } from "yup";
 
 export default function Games() {
+  const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
   const [games, setGames] = useState([]);
   const [allGames, setAllGames] = useState([]);
@@ -17,6 +20,20 @@ export default function Games() {
   const [errorMessage, setErrorMessage] = useState("");
   const [isAllGames, setIsAllGames] = useState(true);
   const [searchText, setSearchText] = useState("");
+
+  const handleJoinGame = async (gameId) => {
+    setLoading(true);
+    const result = await gamesApi.joinGame(gameId);
+    setError(!result.ok);
+    if (!result.ok) setErrorMessage(result.data);
+    else {
+      console.log({
+        gameId,
+      });
+      navigation.navigate("Game Details", { gameId });
+    }
+    setLoading(false);
+  };
 
   const getGames = async () => {
     setLoading(true);
@@ -97,6 +114,7 @@ export default function Games() {
         loading={loading}
         getGames={getGames}
         playButtonCondition={(item) => !item.player2}
+        onPress={handleJoinGame}
       />
     </SafeView>
   );

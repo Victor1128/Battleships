@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
+import { useNavigation } from "@react-navigation/native";
 
 import SafeView from "../components/SafeView";
 import gamesApi from "../api/game";
@@ -7,11 +8,16 @@ import ListGames from "../components/ListGames";
 import AppTextInput from "../components/AppTextInput";
 
 export default function CurrentGames() {
+  const navigation = useNavigation();
   const [games, setGames] = useState([]);
   const [allGames, setAllGames] = useState([]);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user } = useContext(AuthContext);
+
+  const handlePlay = (gameId) => {
+    navigation.navigate("Game Details", { gameId });
+  };
 
   const getGames = async () => {
     setLoading(true);
@@ -57,6 +63,7 @@ export default function CurrentGames() {
         error={error}
         getGames={getGames}
         playButtonCondition={(item) => item.status !== "CREATED"}
+        onPress={handlePlay}
       />
     </SafeView>
   );

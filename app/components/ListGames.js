@@ -5,6 +5,9 @@ import AppText from "./AppText";
 import AppButton from "./AppButton";
 import GameElement from "./GameElement";
 import ListItemSeparator from "./ListItemSeparator";
+import ErrorWithRetry from "./ErrorWithRetry";
+import AppActivityIndicator from "./AppActivityIndicator";
+import { ref } from "yup";
 
 export default function ListGames({
   error,
@@ -13,21 +16,17 @@ export default function ListGames({
   games,
   getGames,
   playButtonCondition,
+  onPress,
 }) {
   const [refreshing, setRefreshing] = useState(false);
 
   return (
     <>
-      {error && (
-        <>
-          <AppText>
-            {errorMessage === "Invalid token!"
-              ? "Please login again!"
-              : errorMessage}
-          </AppText>
-          <AppButton title="Retry" onPress={getGames} />
-        </>
-      )}
+      <ErrorWithRetry
+        error={error}
+        errorMessage={errorMessage}
+        onPress={getGames}
+      />
       <FlatList
         data={games}
         keyExtractor={(item) => item.id}
@@ -37,19 +36,15 @@ export default function ListGames({
             player1Email={item.player1Id && item.player1.email}
             player2Email={item.player2Id && item.player2.email}
             status={item.status}
-            onPress={() => console.log(item.id)}
+            onPress={() => onPress(item.id)}
             hasPlayButton={playButtonCondition(item)}
           />
         )}
         ItemSeparatorComponent={ListItemSeparator}
         refreshing={refreshing}
-        onRefresh={getGames}
+        onRefresh={() => getGames(true)}
       />
-      {loading && (
-        <View style={styles.loading}>
-          <ActivityIndicator size="large" />
-        </View>
-      )}
+      <AppActivityIndicator loading={loading} />
     </>
   );
 }

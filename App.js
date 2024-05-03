@@ -42,7 +42,6 @@ export default function App() {
       }
       authApi.setAuthToken(token);
       apiClient.addRequestTransform((request) => {
-        console.log("Here", token);
         if (isTokenExpired(token)) {
           authStorage.deleteToken();
           authApi.removeAuthToken();

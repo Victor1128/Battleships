@@ -4,8 +4,6 @@ import Games from "../screens/Games";
 import GameDetails from "../screens/GameDetails";
 import GameAdd from "../screens/GameAdd";
 
-
-
 const Stack = createStackNavigator();
 
 const GameNavigator = () => (
@@ -15,7 +13,16 @@ const GameNavigator = () => (
       component={Games}
       options={{ headerShown: false }}
     />
-    <Stack.Screen name="Game Details" component={GameDetails} />
+    {/* <Stack.Screen name="Game Details">
+      {({ route }) => <GameDetails gameId={route.params.gameId} />}
+    </Stack.Screen> */}
+    <Stack.Screen
+      name="Game Details"
+      component={GameDetails}
+      options={{
+        title: "Game",
+      }}
+    />
     <Stack.Screen name="Add Game" component={GameAdd} />
   </Stack.Navigator>
 );
