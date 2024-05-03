@@ -15,7 +15,8 @@ export default function CurrentGames() {
   const [loading, setLoading] = useState(false);
   const { user } = useContext(AuthContext);
 
-  const handlePlay = ({id, status}) => {
+  const handlePlay = ({ id, status }) => {
+    console.log("in current games", id, status);
     navigation.navigate(
       status === "MAP_CONFIG" ? "Configure Map" : "Gameplay",
       { id }

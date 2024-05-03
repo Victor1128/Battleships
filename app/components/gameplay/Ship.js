@@ -43,7 +43,7 @@ const Ship = ({ size, isHorizontal = true, onDragEnd }) => {
         pan.extractOffset();
         ref.current.measure((x, y, width, height, pageX, pageY) => {
           setVisible(
-            !onDragEnd(size, isHorizontal,{
+            !onDragEnd(size, isHorizontal, {
               x: gestureState.moveX - (gestureState.x0 - pageX),
               y: gestureState.moveY - (gestureState.y0 - pageY),
             })
@@ -91,8 +91,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 5,
-    marginHorizontal: 5,
     zIndex: 2,
+    marginBottom: 10,
   },
   shipText: {
     color: "white",

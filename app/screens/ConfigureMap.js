@@ -9,7 +9,13 @@ import {
   TouchableWithoutFeedback,
   StatusBar,
 } from "react-native";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  startTransition,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import SafeView from "../components/SafeView";
 import AppText from "../components/AppText";
@@ -19,11 +25,19 @@ import Ship from "../components/gameplay/Ship";
 import ShipsContainer from "../components/gameplay/ShipsContainer";
 import Grid from "../components/gameplay/Grid";
 import colors from "../config/colors";
+import AppButton from "../components/AppButton";
+import game from "../api/game";
+import ErrorWithRetry from "../components/ErrorWithRetry";
 
 export default function ConfigureMap({ route, navigation }) {
   const authContext = useContext(AuthContext);
   const [userId, setUserId] = useState();
-  const [gameId, setGameId] = useState(route.params.gameId);
+  const [gameId, setGameId] = useState(route.params.id);
+  const [xGrid, setXGrid] = useState(1);
+  const [yGrid, setYGrid] = useState(1);
+  const [ships, setShips] = useState([]);
+  const [errorMessage, setErrorMessage] = useState();
+  const [error, setError] = useState(false);
   const [grid, setGrid] = useState(() => {
     const initialGrid = [];
     for (let i = 0; i < gameSettings.GRID_SIZE; i++) {
@@ -31,17 +45,22 @@ export default function ConfigureMap({ route, navigation }) {
     }
     return initialGrid;
   });
-  const [xGrid, setXGrid] = useState(1);
-  const [yGrid, setYGrid] = useState(1);
+
+  const statusBarHeight = StatusBar.currentHeight || 0;
+
   const xGridRef = useRef(xGrid);
   const yGridRef = useRef(yGrid);
   const gridRef = useRef();
-  const statusBarHeight = StatusBar.currentHeight || 0;
+  const shipsRef = useRef(ships);
 
   useEffect(() => {
     xGridRef.current = xGrid;
     yGridRef.current = yGrid;
   }, [xGrid, yGrid]);
+
+  useEffect(() => {
+    shipsRef.current = ships;
+  }, [ships]);
 
   useEffect(() => {
     setUserId(authContext.user.userId);
@@ -55,10 +74,19 @@ export default function ConfigureMap({ route, navigation }) {
     console.log("grid2", xGrid, yGrid);
     const cellX = Math.round((x - xGridRef.current) / gameSettings.CELL_SIZE);
     const cellY = Math.round((y - yGridRef.current) / gameSettings.CELL_SIZE);
+    console.log("ships", shipsRef.current);
     console.log("Cells:", cellX, cellY, size, isHorizontal);
     if (isPlacementValid(size, isHorizontal, cellX, cellY)) {
       placeShip(size, isHorizontal, cellX, cellY);
-      console.log(grid);
+      setShips([
+        ...shipsRef.current,
+        {
+          size,
+          direction: isHorizontal ? "HORIZONTAL" : "VERTICAL",
+          x: String.fromCharCode(65 + cellX),
+          y: cellY + 1,
+        },
+      ]);
       return true;
     }
     return false;
@@ -124,6 +152,18 @@ export default function ConfigureMap({ route, navigation }) {
       });
   };
 
+  const handleSubmit = async () => {
+    const response = await game.configureMap(gameId, { ships });
+    console.log(response);
+    setError(!response.ok);
+    if (!response.ok) {
+      setErrorMessage(response.data.message);
+      return;
+    }
+    console.log(gameId);
+    navigation.navigate("Gameplay", { gameId });
+  };
+
   return (
     <SafeView style={styles.container}>
       <ShipsContainer onDragEnd={handleShipPlacement} />
@@ -152,6 +192,9 @@ export default function ConfigureMap({ route, navigation }) {
         ))}
       </View>
       {/* <Grid /> */}
+      <ErrorWithRetry errorMessage={errorMessage} error={error} retry={false} />
+
+      <AppButton title="Submit" color="green" onPress={handleSubmit} />
     </SafeView>
   );
 }

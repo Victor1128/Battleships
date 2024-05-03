@@ -3,47 +3,21 @@ import React from "react";
 import Ship from "./Ship";
 import gameSettings from "../../config/gameSettings";
 
-export default function ShipsContainer({ onDragStart, onDragEnd }) {
+export default function ShipsContainer({ onDragEnd }) {
   return (
-    <View>
-      <View style={styles.row}>
-        <Ship
-          size={gameSettings.SHIP_SIZES[0]}
-          onDragStart={onDragStart}
-          onDragEnd={onDragEnd}
-        />
-        <Ship
-          size={gameSettings.SHIP_SIZES[1]}
-          onDragStart={onDragStart}
-          onDragEnd={onDragEnd}
-        />
-      </View>
-      <View style={styles.row}>
-        <Ship
-          size={gameSettings.SHIP_SIZES[2]}
-          onDragStart={onDragStart}
-          onDragEnd={onDragEnd}
-        />
-        <Ship
-          size={gameSettings.SHIP_SIZES[3]}
-          onDragStart={onDragStart}
-          onDragEnd={onDragEnd}
-        />
-        <Ship
-          size={gameSettings.SHIP_SIZES[4]}
-          onDragStart={onDragStart}
-          onDragEnd={onDragEnd}
-        />
-      </View>
+    <View style={styles.container}>
+      {gameSettings.SHIP_SIZES.map((item, index) => {
+        return <Ship key={index} size={item} onDragEnd={onDragEnd} />;
+      })}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: {
+  container: {
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "space-evenly",
-    marginBottom: 10,
-    height: gameSettings.CELL_SIZE,
+    height: "20%",
   },
 });

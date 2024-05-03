@@ -5,12 +5,17 @@ import AppText from "./AppText";
 import AppButton from "./AppButton";
 import colors from "../config/colors";
 
-export default function ErrorWithRetry({ error, errorMessage, onPress }) {
+export default function ErrorWithRetry({
+  error,
+  errorMessage,
+  onPress,
+  retry = true,
+}) {
   return (
     error && (
       <View>
         <AppText style={styles.text}>{errorMessage}</AppText>
-        <AppButton title="Retry" onPress={onPress} />
+        {retry && <AppButton title="Retry" onPress={onPress} />}
       </View>
     )
   );

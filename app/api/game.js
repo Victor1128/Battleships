@@ -8,4 +8,7 @@ const joinGame = (gameId) => apiClient.post(`${endpoint}/join/${gameId}`);
 
 const getGameDetails = (gameId) => apiClient.get(`${endpoint}/${gameId}`);
 
-export default { getGames, joinGame, getGameDetails };
+const configureMap = (gameId, data) =>
+  apiClient.patch(`${endpoint}/${gameId}`, data);
+
+export default { getGames, joinGame, getGameDetails, configureMap };
