@@ -23,23 +23,99 @@ export default function ConfigureMap({ route, navigation }) {
   const authContext = useContext(AuthContext);
   const [userId, setUserId] = useState();
   const [gameId, setGameId] = useState(route.params.gameId);
-  const [grid, setGrid] = useState(
-    Array(gameSettings.GRID_SIZE).fill(Array(gameSettings.GRID_SIZE).fill(null))
-  );
+  const [grid, setGrid] = useState(() => {
+    const initialGrid = [];
+    for (let i = 0; i < gameSettings.GRID_SIZE; i++) {
+      initialGrid.push(Array(gameSettings.GRID_SIZE).fill(null));
+    }
+    return initialGrid;
+  });
+  const [xGrid, setXGrid] = useState(42.31111145019531);
+  const [yGrid, setYGrid] = useState(219.022216796875);
 
   const gridRef = useRef();
 
-  const handleShipPlacement = (position) => {
-    console.log(position);
+  const handleShipPlacement = (size, isHorizontal, position) => {
+    // return true if the ship is placed successfully
+    const { x, y } = position;
+    console.log("position", x, y);
+    console.log("Grid", xGrid, yGrid);
+    const cellX = Math.round((x - xGrid) / gameSettings.CELL_SIZE);
+    const cellY = Math.round((y - yGrid) / gameSettings.CELL_SIZE);
+    console.log(cellX, cellY, size, isHorizontal);
+    if (isPlacementValid(size, isHorizontal, cellX, cellY)) {
+      placeShip(size, isHorizontal, cellX, cellY);
+      console.log(grid);
+      return true;
+    }
+    return false;
+  };
 
-    gridRef.current.measure((x, y, width, height, pageX, pageY) => {
-      console.log(pageX, pageY);
-      console.log(position);
-    });
+  const placeShip = (size, isHorizontal, x, y) => {
+    if (isHorizontal) {
+      for (let i = 0; i < size; i++) {
+        colorCell(x + i, y);
+      }
+    } else {
+      for (let i = 0; i < size; i++) {
+        colorCell(x, y + i);
+      }
+    }
+  };
+
+  const isPlacementValid = (size, isHorizontal, x, y) => {
+    if (
+      x >= gameSettings.GRID_SIZE ||
+      y >= gameSettings.GRID_SIZE ||
+      x < 0 ||
+      y < 0
+    )
+      return false;
+    if (isHorizontal) {
+      if (x + size >= gameSettings.GRID_SIZE) {
+        return false;
+      }
+      for (let i = 0; i < size; i++) {
+        if (grid[y][x + i] !== null) {
+          return false;
+        }
+      }
+    } else {
+      if (y + size >= gameSettings.GRID_SIZE) {
+        return false;
+      }
+      for (let i = 0; i < size; i++) {
+        if (grid[y + i][x] !== null) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
+  const colorCell = (x, y) => {
+    const newGrid = [...grid];
+    newGrid[y][x] = "blue";
+    console.log(x, y);
+    console.log(grid[y] === grid[y + 1]);
+    setGrid(newGrid);
+  };
+
+  const setInitialGridCoordinates = (x, y) => {
+    setXGrid(x);
+    setYGrid(y);
   };
 
   useEffect(() => {
+    const f = async () => {
+      await new Promise((r) => setTimeout(r, 1000));
+      gridRef.current.measure((x, y, width, height, pageX, pageY) => {
+        console.log("initial1", x, y, width, height, pageX, pageY);
+        setInitialGridCoordinates(pageX, pageY);
+      });
+    };
     setUserId(authContext.user.userId);
+    f();
   }, []);
 
   return (
@@ -51,10 +127,13 @@ export default function ConfigureMap({ route, navigation }) {
             {row.map((cell, cellIndex) => (
               // <TouchableWithoutFeedback key={cellIndex}>
               <View
-                key={cellIndex}
+                key={rowIndex.toString() + cellIndex.toString()}
                 style={[
                   styles.cell,
-                  { backgroundColor: cell !== null ? "blue" : colors.white },
+                  {
+                    backgroundColor:
+                      cell === null ? colors.white : colors[cell],
+                  },
                 ]}
               />
               // </TouchableWithoutFeedback>
