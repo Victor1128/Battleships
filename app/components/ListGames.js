@@ -8,6 +8,7 @@ import ListItemSeparator from "./ListItemSeparator";
 
 export default function ListGames({
   error,
+  errorMessage,
   loading,
   games,
   getGames,
@@ -19,7 +20,11 @@ export default function ListGames({
     <>
       {error && (
         <>
-          <AppText>Error loading games</AppText>
+          <AppText>
+            {errorMessage === "Invalid token!"
+              ? "Please login again!"
+              : errorMessage}
+          </AppText>
           <AppButton title="Retry" onPress={getGames} />
         </>
       )}

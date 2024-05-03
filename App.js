@@ -8,9 +8,8 @@ import "core-js/stable/atob";
 import AuthNavigator from "./app/navigation/AuthNavigator";
 import AppNavigator from "./app/navigation/AppNavigator";
 import authStorage from "./app/auth/storage";
-import UserDetails from "./app/screens/UserDetails";
-import LandingPage from "./app/screens/LandingPage";
 import authApi from "./app/api/auth";
+import apiClient from "./app/api/client";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -18,10 +17,39 @@ export default function App() {
   const [user, setUser] = useState();
   const [isReady, setIsReady] = useState(false);
 
+  const isTokenExpired = (token) => {
+    if (!token) {
+      return true;
+    }
+    try {
+      const decoded = jwtDecode(token);
+      const expirationTime = decoded.exp;
+      const currentTime = Date.now() / 1000;
+      return expirationTime < currentTime;
+    } catch (error) {
+      return true;
+    }
+  };
+
   const restoreUser = async () => {
     const token = await authStorage.getToken();
     if (token) {
+      if (isTokenExpired(token)) {
+        authStorage.deleteToken();
+        authApi.removeAuthToken();
+        setUser(null);
+        return;
+      }
       authApi.setAuthToken(token);
+      apiClient.addRequestTransform((request) => {
+        console.log("Here", token);
+        if (isTokenExpired(token)) {
+          authStorage.deleteToken();
+          authApi.removeAuthToken();
+          setUser(null);
+          return;
+        }
+      });
       setUser(jwtDecode(token));
     }
     setIsReady(true);
@@ -32,11 +60,11 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    async function hideSplash() {
+    const hideSplash = async () => {
       if (isReady) {
         await SplashScreen.hideAsync();
       }
-    }
+    };
     hideSplash();
   }, [isReady]);
 

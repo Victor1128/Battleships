@@ -32,6 +32,7 @@ export default function UserDetails() {
       console.log(response.data);
     };
     getUser();
+    console.log("Here", user);
   }, []);
 
   if (error) {

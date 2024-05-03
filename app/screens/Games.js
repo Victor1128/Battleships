@@ -14,6 +14,7 @@ export default function Games() {
   const [allGames, setAllGames] = useState([]);
   const [openGames, setOpenGames] = useState([]);
   const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [isAllGames, setIsAllGames] = useState(true);
   const [searchText, setSearchText] = useState("");
 
@@ -30,7 +31,7 @@ export default function Games() {
         ? result.data.games
         : result.data.games.filter((game) => game.status === "CREATED");
       setGames(filterGamesByText(localGames));
-    }
+    } else setErrorMessage(result.data);
     setLoading(false);
   };
 
@@ -91,6 +92,7 @@ export default function Games() {
       </View>
       <ListGames
         error={error}
+        errorMessage={errorMessage}
         games={games}
         loading={loading}
         getGames={getGames}
