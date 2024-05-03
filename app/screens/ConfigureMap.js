@@ -7,6 +7,7 @@ import {
   PanResponder,
   Animated,
   TouchableWithoutFeedback,
+  StatusBar,
 } from "react-native";
 import React, { useContext, useEffect, useRef, useState } from "react";
 
@@ -30,19 +31,31 @@ export default function ConfigureMap({ route, navigation }) {
     }
     return initialGrid;
   });
-  const [xGrid, setXGrid] = useState(42.31111145019531);
-  const [yGrid, setYGrid] = useState(219.022216796875);
-
+  const [xGrid, setXGrid] = useState(1);
+  const [yGrid, setYGrid] = useState(1);
+  const xGridRef = useRef(xGrid);
+  const yGridRef = useRef(yGrid);
   const gridRef = useRef();
+  const statusBarHeight = StatusBar.currentHeight || 0;
+
+  useEffect(() => {
+    xGridRef.current = xGrid;
+    yGridRef.current = yGrid;
+  }, [xGrid, yGrid]);
+
+  useEffect(() => {
+    setUserId(authContext.user.userId);
+  }, []);
 
   const handleShipPlacement = (size, isHorizontal, position) => {
     // return true if the ship is placed successfully
     const { x, y } = position;
     console.log("position", x, y);
-    console.log("Grid", xGrid, yGrid);
-    const cellX = Math.round((x - xGrid) / gameSettings.CELL_SIZE);
-    const cellY = Math.round((y - yGrid) / gameSettings.CELL_SIZE);
-    console.log(cellX, cellY, size, isHorizontal);
+    console.log("Grid", xGridRef.current, yGridRef.current);
+    console.log("grid2", xGrid, yGrid);
+    const cellX = Math.round((x - xGridRef.current) / gameSettings.CELL_SIZE);
+    const cellY = Math.round((y - yGridRef.current) / gameSettings.CELL_SIZE);
+    console.log("Cells:", cellX, cellY, size, isHorizontal);
     if (isPlacementValid(size, isHorizontal, cellX, cellY)) {
       placeShip(size, isHorizontal, cellX, cellY);
       console.log(grid);
@@ -72,7 +85,7 @@ export default function ConfigureMap({ route, navigation }) {
     )
       return false;
     if (isHorizontal) {
-      if (x + size >= gameSettings.GRID_SIZE) {
+      if (x + size > gameSettings.GRID_SIZE) {
         return false;
       }
       for (let i = 0; i < size; i++) {
@@ -81,7 +94,7 @@ export default function ConfigureMap({ route, navigation }) {
         }
       }
     } else {
-      if (y + size >= gameSettings.GRID_SIZE) {
+      if (y + size > gameSettings.GRID_SIZE) {
         return false;
       }
       for (let i = 0; i < size; i++) {
@@ -101,33 +114,30 @@ export default function ConfigureMap({ route, navigation }) {
     setGrid(newGrid);
   };
 
-  const setInitialGridCoordinates = (x, y) => {
-    setXGrid(x);
-    setYGrid(y);
-  };
-
-  useEffect(() => {
-    const f = async () => {
-      await new Promise((r) => setTimeout(r, 1000));
+  const setInitialGridCoordinates = () => {
+    if (gridRef.current)
       gridRef.current.measure((x, y, width, height, pageX, pageY) => {
         console.log("initial1", x, y, width, height, pageX, pageY);
-        setInitialGridCoordinates(pageX, pageY);
+        console.log("status bar", statusBarHeight);
+        setXGrid(pageX - statusBarHeight);
+        setYGrid(pageY - statusBarHeight);
       });
-    };
-    setUserId(authContext.user.userId);
-    f();
-  }, []);
+  };
 
   return (
     <SafeView style={styles.container}>
       <ShipsContainer onDragEnd={handleShipPlacement} />
-      <View ref={gridRef} style={styles.gridContainer}>
+      <View
+        ref={gridRef}
+        style={styles.gridContainer}
+        onLayout={setInitialGridCoordinates}
+      >
         {grid.map((row, rowIndex) => (
           <View key={rowIndex} style={styles.row}>
             {row.map((cell, cellIndex) => (
               // <TouchableWithoutFeedback key={cellIndex}>
               <View
-                key={rowIndex.toString() + cellIndex.toString()}
+                key={rowIndex.toString() + cellIndex.toString() + "1"}
                 style={[
                   styles.cell,
                   {
@@ -151,13 +161,6 @@ const styles = StyleSheet.create({
     flex: 1,
     // alignItems: "center",
     // justifyContent: "center",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-    position: "absolute",
-    top: 0,
   },
   gridContainer: {
     marginTop: 30,

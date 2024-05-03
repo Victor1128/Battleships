@@ -44,5 +44,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-evenly",
     marginBottom: 10,
+    height: gameSettings.CELL_SIZE,
   },
 });
