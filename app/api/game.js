@@ -11,4 +11,7 @@ const getGameDetails = (gameId) => apiClient.get(`${endpoint}/${gameId}`);
 const configureMap = (gameId, data) =>
   apiClient.patch(`${endpoint}/${gameId}`, data);
 
-export default { getGames, joinGame, getGameDetails, configureMap };
+const sendStrike = (gameId, data) =>
+  apiClient.post(`${endpoint}/strike/${gameId}`, data);
+
+export default { getGames, joinGame, getGameDetails, configureMap, sendStrike };

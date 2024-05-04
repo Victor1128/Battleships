@@ -4,7 +4,7 @@ import gameSettings from "../../config/gameSettings";
 import colors from "../../config/colors";
 import AppButton from "../AppButton";
 
-export default function Grid({ grid }) {
+export default function Grid({ grid, onCellPress }) {
   return (
     <View style={styles.container}>
       {grid.map((row, rowIndex) => (
@@ -12,6 +12,7 @@ export default function Grid({ grid }) {
           {row.map((cell, cellIndex) => (
             <TouchableWithoutFeedback
               key={rowIndex.toString() + cellIndex.toString()}
+              onPress={() => onCellPress(rowIndex, cellIndex)}
             >
               <View
                 style={[

@@ -23,6 +23,10 @@ const letterToNumber = (letter) => {
   return letter.charCodeAt(0) - 65;
 };
 
+const numberToLetter = (number) => {
+  return String.fromCharCode(number + 65);
+};
+
 export default function GamePlay({ route, navigation }) {
   const gameId = route.params.id;
   const [userGrid, setUserGrid] = useState(initializeGrid);
@@ -30,9 +34,12 @@ export default function GamePlay({ route, navigation }) {
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState();
   const [userId, setUserId] = useState();
+  const [selectedCell, setSelectedCell] = useState({ x: null, y: null });
   const authContext = useContext(AuthContext);
 
+  //TODO: find an fix bug for test1 (not showing grid idk)
   const getGame = async () => {
+    setError(false);
     const result = await game.getGameDetails(gameId);
     setError(!result.ok);
     if (!result.ok) {
@@ -47,7 +54,49 @@ export default function GamePlay({ route, navigation }) {
             : "blue";
         });
       setUserGrid(newUserGrid);
+
+      const newOpponentGrid = initializeGrid();
+      result.data.shipsCoord
+        .filter((ship) => ship.playerId !== authContext.user.userId)
+        .forEach((element) => {
+          newOpponentGrid[element.y][letterToNumber(element.x)] = element.hit
+            ? "danger"
+            : "blue";
+        });
+      setOpponentGrid(newOpponentGrid);
     }
+  };
+
+  const sendStrike = async () => {
+    const result = await game.sendStrike(gameId, {
+      x: numberToLetter(selectedCell.y),
+      y: selectedCell.x,
+    });
+    setError(!result.ok);
+    if (!result.ok) {
+      setErrorMessage(result.data.message);
+      console.log(result.data);
+    } else {
+      console.log(result.data);
+      const newOpponentGrid = [...opponentGrid];
+      newOpponentGrid[selectedCell.x][selectedCell.y] = result.data.result
+        ? "danger"
+        : "light_blue";
+      setOpponentGrid(newOpponentGrid);
+      setSelectedCell({ x: null, y: null });
+    }
+  };
+
+  const onCellPress = (x, y) => {
+    if (opponentGrid[x][y] !== null) {
+      return;
+    }
+    const newGrid = [...opponentGrid];
+    if (selectedCell.x !== null) newGrid[selectedCell.x][selectedCell.y] = null;
+    newGrid[x][y] = "light_red";
+    setOpponentGrid(newGrid);
+    setSelectedCell({ x, y });
+    console.log(x, y);
   };
 
   useEffect(() => {
@@ -63,11 +112,16 @@ export default function GamePlay({ route, navigation }) {
       <ErrorWithRetry retry={getGame} message={errorMessage} error={error} />
       <ScrollView contentContainerStyle={styles.gridsContainer}>
         <AppText>Opponent's ships</AppText>
-        <Grid grid={opponentGrid} />
+        <Grid grid={opponentGrid} onCellPress={onCellPress} />
         <AppText>Your ships</AppText>
         <Grid grid={userGrid} />
       </ScrollView>
-      <AppButton icon="bomb" color="danger" style={styles.hitButton} />
+      <AppButton
+        icon="bomb"
+        color="danger"
+        style={styles.hitButton}
+        onPress={sendStrike}
+      />
     </SafeView>
   );
 }

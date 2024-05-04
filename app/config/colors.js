@@ -12,4 +12,6 @@ export default {
   light_green: "#e7f4e7",
   blue: "#4b7bec",
   yellow: "#f6e58d",
+  light_blue: "#ADD8E6",
+  light_red: "#F08080",
 };
