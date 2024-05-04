@@ -3,11 +3,11 @@ import React from "react";
 import Ship from "./Ship";
 import gameSettings from "../../config/gameSettings";
 
-export default function ShipsContainer({ onDragEnd }) {
+export default function ShipsContainer({ onDragEnd, availableShips }) {
   return (
     <View style={styles.container}>
-      {gameSettings.SHIP_SIZES.map((item, index) => {
-        return <Ship key={index} size={item} onDragEnd={onDragEnd} />;
+      {availableShips.map((item) => {
+        return <Ship key={item.id} id={item.id} size={item.size} onDragEnd={onDragEnd} />;
       })}
     </View>
   );

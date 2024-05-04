@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import gameSettings from "../../config/gameSettings";
 
-const Ship = ({ size, isHorizontal = true, onDragEnd }) => {
+const Ship = ({id, size, isHorizontal = true, onDragEnd }) => {
   const [horizontal, setHorizontal] = useState(isHorizontal);
   const [position, setPosition] = useState("relative");
   const [visible, setVisible] = useState(true);
@@ -43,7 +43,7 @@ const Ship = ({ size, isHorizontal = true, onDragEnd }) => {
         pan.extractOffset();
         ref.current.measure((x, y, width, height, pageX, pageY) => {
           setVisible(
-            !onDragEnd(size, isHorizontal, {
+            !onDragEnd(id, size, isHorizontal, {
               x: gestureState.moveX - (gestureState.x0 - pageX),
               y: gestureState.moveY - (gestureState.y0 - pageY),
             })
@@ -54,7 +54,7 @@ const Ship = ({ size, isHorizontal = true, onDragEnd }) => {
   ).current;
 
   return (
-    visible && (
+   (
       <Animated.View
         {...panResponder.panHandlers}
         ref={ref}

@@ -36,6 +36,9 @@ export default function ConfigureMap({ route, navigation }) {
   const [xGrid, setXGrid] = useState(1);
   const [yGrid, setYGrid] = useState(1);
   const [ships, setShips] = useState([]);
+  const [availableShips, setAvailableShips] = useState(
+    gameSettings.AVAILABLE_SHIPS
+  );
   const [errorMessage, setErrorMessage] = useState();
   const [error, setError] = useState(false);
   const [grid, setGrid] = useState(() => {
@@ -45,13 +48,18 @@ export default function ConfigureMap({ route, navigation }) {
     }
     return initialGrid;
   });
-
   const statusBarHeight = StatusBar.currentHeight || 0;
 
   const xGridRef = useRef(xGrid);
   const yGridRef = useRef(yGrid);
   const gridRef = useRef();
   const shipsRef = useRef(ships);
+  const availableShipsRef = useRef(availableShips);
+  const physicalGridRef = useRef(grid);
+
+  useEffect(() => {
+    physicalGridRef.current = grid;
+  }, [grid]);
 
   useEffect(() => {
     xGridRef.current = xGrid;
@@ -63,17 +71,21 @@ export default function ConfigureMap({ route, navigation }) {
   }, [ships]);
 
   useEffect(() => {
+    availableShipsRef.current = availableShips;
+  }, [availableShips]);
+
+  useEffect(() => {
     setUserId(authContext.user.userId);
   }, []);
 
-  const handleShipPlacement = (size, isHorizontal, position) => {
+  const handleShipPlacement = (shipId, size, isHorizontal, position) => {
     // return true if the ship is placed successfully
     const { x, y } = position;
     console.log("position", x, y);
     console.log("Grid", xGridRef.current, yGridRef.current);
     console.log("grid2", xGrid, yGrid);
-    const cellX = Math.round((x - xGridRef.current) / gameSettings.CELL_SIZE);
-    const cellY = Math.round((y - yGridRef.current) / gameSettings.CELL_SIZE);
+    const cellX = Math.floor((x - xGridRef.current) / gameSettings.CELL_SIZE);
+    const cellY = Math.floor((y - yGridRef.current) / gameSettings.CELL_SIZE);
     console.log("ships", shipsRef.current);
     console.log("Cells:", cellX, cellY, size, isHorizontal);
     if (isPlacementValid(size, isHorizontal, cellX, cellY)) {
@@ -82,26 +94,32 @@ export default function ConfigureMap({ route, navigation }) {
         ...shipsRef.current,
         {
           size,
+          id: shipId,
           direction: isHorizontal ? "HORIZONTAL" : "VERTICAL",
           x: String.fromCharCode(65 + cellX),
           y: cellY + 1,
         },
       ]);
+      setAvailableShips(
+        availableShipsRef.current.filter(({ id }) => id !== shipId)
+      );
       return true;
     }
     return false;
   };
 
   const placeShip = (size, isHorizontal, x, y) => {
+    const newGrid = [...physicalGridRef.current];
     if (isHorizontal) {
       for (let i = 0; i < size; i++) {
-        colorCell(x + i, y);
+        newGrid[y][x + i] = "blue";
       }
     } else {
       for (let i = 0; i < size; i++) {
-        colorCell(x, y + i);
+        newGrid[y + i][x] = "blue";
       }
     }
+    setGrid(newGrid);
   };
 
   const isPlacementValid = (size, isHorizontal, x, y) => {
@@ -117,7 +135,7 @@ export default function ConfigureMap({ route, navigation }) {
         return false;
       }
       for (let i = 0; i < size; i++) {
-        if (grid[y][x + i] !== null) {
+        if (physicalGridRef.current[y][x + i] !== null) {
           return false;
         }
       }
@@ -126,20 +144,12 @@ export default function ConfigureMap({ route, navigation }) {
         return false;
       }
       for (let i = 0; i < size; i++) {
-        if (grid[y + i][x] !== null) {
+        if (physicalGridRef.current[y + i][x] !== null) {
           return false;
         }
       }
     }
     return true;
-  };
-
-  const colorCell = (x, y) => {
-    const newGrid = [...grid];
-    newGrid[y][x] = "blue";
-    console.log(x, y);
-    console.log(grid[y] === grid[y + 1]);
-    setGrid(newGrid);
   };
 
   const setInitialGridCoordinates = () => {
@@ -153,6 +163,9 @@ export default function ConfigureMap({ route, navigation }) {
   };
 
   const handleSubmit = async () => {
+    ships.forEach((ship) => {
+      delete ship.id;
+    });
     const response = await game.configureMap(gameId, { ships });
     console.log(response);
     setError(!response.ok);
@@ -164,9 +177,45 @@ export default function ConfigureMap({ route, navigation }) {
     navigation.navigate("Gameplay", { gameId });
   };
 
+  const handleReset = () => {
+    setGrid(() => {
+      const initialGrid = [];
+      for (let i = 0; i < gameSettings.GRID_SIZE; i++) {
+        initialGrid.push(Array(gameSettings.GRID_SIZE).fill(null));
+      }
+      return initialGrid;
+    });
+    setAvailableShips(gameSettings.AVAILABLE_SHIPS);
+    setShips([]);
+  };
+
+  // const handleUndo = () => {
+  //   console.log(pastGrids.pop());
+  //   console.log(pastGrids);
+  //   console.log("undo", pastGrids.length, ships.length);
+  //   console.log("pastGrids", pastGrids);
+  //   console.log("pastGrids2", pastGrids[pastGrids.length - 2]);
+  //   console.log("grid", grid);
+  //   console.log(grid === pastGrids[pastGrids.length - 1]);
+  //   if (pastGrids.length > 1) {
+  //     setGrid(pastGrids[pastGrids.length - 2]);
+  //     pastGrids.pop();
+
+  //     const lastShip = ships[ships.length - 1];
+  //     setShips(ships.slice(0, ships.length - 1));
+  //     setAvailableShips([
+  //       ...availableShips,
+  //       gameSettings.AVAILABLE_SHIPS.find(({ id }) => id === lastShip.id),
+  //     ]);
+  //   }
+  // };
+
   return (
     <SafeView style={styles.container}>
-      <ShipsContainer onDragEnd={handleShipPlacement} />
+      <ShipsContainer
+        onDragEnd={handleShipPlacement}
+        availableShips={availableShips}
+      />
       <View
         ref={gridRef}
         style={styles.gridContainer}
@@ -177,7 +226,11 @@ export default function ConfigureMap({ route, navigation }) {
             {row.map((cell, cellIndex) => (
               // <TouchableWithoutFeedback key={cellIndex}>
               <View
-                key={rowIndex.toString() + cellIndex.toString() + "1"}
+                key={
+                  rowIndex.toString() +
+                  cellIndex.toString() +
+                  cellIndex.toString()
+                }
                 style={[
                   styles.cell,
                   {
@@ -193,8 +246,27 @@ export default function ConfigureMap({ route, navigation }) {
       </View>
       {/* <Grid /> */}
       <ErrorWithRetry errorMessage={errorMessage} error={error} retry={false} />
-
-      <AppButton title="Submit" color="green" onPress={handleSubmit} />
+      <View style={styles.buttonsContainer}>
+        <AppButton
+          icon="trash-can-outline"
+          color="danger"
+          onPress={handleReset}
+          style={styles.circularButton}
+        />
+        <AppButton
+          disabled={ships.length !== gameSettings.AVAILABLE_SHIPS.length}
+          title="Submit"
+          color="green"
+          onPress={handleSubmit}
+          style={styles.button}
+        />
+        <AppButton
+          icon="undo"
+          color="yellow"
+          onPress={() => console.log("not working")}
+          style={styles.circularButton}
+        />
+      </View>
     </SafeView>
   );
 }
@@ -219,6 +291,23 @@ const styles = StyleSheet.create({
     height: gameSettings.CELL_SIZE,
     borderWidth: 1,
     borderColor: colors.dark,
+  },
+  button: { width: 200 },
+  circularButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonsContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
+    paddingVertical: 10,
   },
   // shipsPanel: {
   //   alignItems: "center",
