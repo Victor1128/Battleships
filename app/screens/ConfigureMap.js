@@ -255,17 +255,17 @@ export default function ConfigureMap({ route, navigation }) {
         />
         <AppButton
           disabled={ships.length !== gameSettings.AVAILABLE_SHIPS.length}
-          title="Submit"
+          icon='check'
           color="green"
           onPress={handleSubmit}
-          style={styles.button}
+          style={styles.circularButton}
         />
-        <AppButton
+        {/* <AppButton
           icon="undo"
           color="yellow"
           onPress={() => console.log("not working")}
           style={styles.circularButton}
-        />
+        /> */}
       </View>
     </SafeView>
   );
