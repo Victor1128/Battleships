@@ -4,54 +4,36 @@ import gameSettings from "../../config/gameSettings";
 import colors from "../../config/colors";
 import AppButton from "../AppButton";
 
-export default function Grid() {
-  const [grid, setGrid] = useState(
-    Array(gameSettings.GRID_SIZE).fill(Array(gameSettings.GRID_SIZE).fill(null))
-  );
-
-  const myRef = useRef();
-
-  const handleMeasure = () => {
-    myRef.current.measure((x, y, width, height, pageX, pageY) => {
-      console.log(pageX, pageY, width, height);
-    });
-  };
-
+export default function Grid({ grid }) {
   return (
-    <View
-      ref={myRef}
-      style={styles.container}
-      onLayout={(event) => {
-        layout = event.nativeEvent.layout;
-        console.log(layout.width, layout.height);
-        console.log(layout);
-      }}
-    >
+    <View style={styles.container}>
       {grid.map((row, rowIndex) => (
-        <View key={rowIndex} style={styles.row}>
+        <View key={rowIndex.toString()} style={styles.row}>
           {row.map((cell, cellIndex) => (
-            <TouchableWithoutFeedback key={cellIndex}>
+            <TouchableWithoutFeedback
+              key={rowIndex.toString() + cellIndex.toString()}
+            >
               <View
-                key={cellIndex}
                 style={[
                   styles.cell,
-                  { backgroundColor: cell !== null ? "blue" : colors.white },
+                  {
+                    backgroundColor:
+                      cell !== null ? colors[cell] : colors.white,
+                  },
                 ]}
               />
             </TouchableWithoutFeedback>
           ))}
         </View>
       ))}
-      <AppButton title="Measure" onPress={handleMeasure} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 30,
+    marginVertical: 20,
     zIndex: 1,
-    left: "10%",
   },
   row: {
     flexDirection: "row",

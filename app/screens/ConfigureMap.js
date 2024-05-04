@@ -226,11 +226,7 @@ export default function ConfigureMap({ route, navigation }) {
             {row.map((cell, cellIndex) => (
               // <TouchableWithoutFeedback key={cellIndex}>
               <View
-                key={
-                  rowIndex.toString() +
-                  cellIndex.toString() +
-                  cellIndex.toString()
-                }
+                key={rowIndex.toString() + cellIndex.toString()}
                 style={[
                   styles.cell,
                   {
@@ -255,7 +251,7 @@ export default function ConfigureMap({ route, navigation }) {
         />
         <AppButton
           disabled={ships.length !== gameSettings.AVAILABLE_SHIPS.length}
-          icon='check'
+          icon="check"
           color="green"
           onPress={handleSubmit}
           style={styles.circularButton}
@@ -297,8 +293,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
+    padding: 0,
   },
   buttonsContainer: {
     alignItems: "center",
