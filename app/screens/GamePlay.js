@@ -1,15 +1,15 @@
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, RefreshControl, ScrollView } from "react-native";
 import React, { useEffect, useState, useContext } from "react";
 
 import SafeView from "../components/SafeView";
 import AppText from "../components/AppText";
 import Grid from "../components/gameplay/Grid";
 import gameSettings from "../config/gameSettings";
-import { ScrollView } from "react-native-gesture-handler";
 import AppButton from "../components/AppButton";
 import game from "../api/game";
 import ErrorWithRetry from "../components/ErrorWithRetry";
 import AuthContext from "../auth/context";
+import colors from "../config/colors";
 
 const initializeGrid = () => {
   const initialGrid = [];
@@ -35,10 +35,14 @@ export default function GamePlay({ route, navigation }) {
   const [errorMessage, setErrorMessage] = useState();
   const [userId, setUserId] = useState();
   const [selectedCell, setSelectedCell] = useState({ x: null, y: null });
+  const [refreshing, setRefreshing] = useState(false);
+  const [isUserToPlay, setIsUserToPlay] = useState(false);
   const authContext = useContext(AuthContext);
 
   //TODO: find an fix bug for test1 (not showing grid idk)
   const getGame = async () => {
+    setRefreshing(true);
+    console.log("getting game");
     setError(false);
     const result = await game.getGameDetails(gameId);
     setError(!result.ok);
@@ -46,6 +50,7 @@ export default function GamePlay({ route, navigation }) {
       setErrorMessage(result.data.message);
     } else {
       const newUserGrid = initializeGrid();
+      setIsUserToPlay(result.data.playerToMoveId === authContext.user.userId);
       result.data.shipsCoord
         .filter((ship) => ship.playerId === authContext.user.userId)
         .forEach((element) => {
@@ -53,18 +58,24 @@ export default function GamePlay({ route, navigation }) {
             ? "danger"
             : "blue";
         });
-      setUserGrid(newUserGrid);
 
       const newOpponentGrid = initializeGrid();
-      result.data.shipsCoord
-        .filter((ship) => ship.playerId !== authContext.user.userId)
-        .forEach((element) => {
-          newOpponentGrid[element.y][letterToNumber(element.x)] = element.hit
-            ? "danger"
-            : "blue";
+      if (result.data.moves) {
+        result.data.moves.forEach((element) => {
+          if (element.playerId === authContext.user.userId) {
+            newOpponentGrid[element.y][letterToNumber(element.x)] =
+              element.result ? "danger" : "light_blue";
+          } else {
+            newUserGrid[element.y][letterToNumber(element.x)] = element.result
+              ? "danger"
+              : "light_blue";
+          }
         });
+      }
+      setUserGrid(newUserGrid);
       setOpponentGrid(newOpponentGrid);
     }
+    setRefreshing(false);
   };
 
   const sendStrike = async () => {
@@ -84,11 +95,12 @@ export default function GamePlay({ route, navigation }) {
         : "light_blue";
       setOpponentGrid(newOpponentGrid);
       setSelectedCell({ x: null, y: null });
+      setIsUserToPlay(false);
     }
   };
 
   const onCellPress = (x, y) => {
-    if (opponentGrid[x][y] !== null) {
+    if (opponentGrid[x][y] !== null || !isUserToPlay) {
       return;
     }
     const newGrid = [...opponentGrid];
@@ -110,7 +122,21 @@ export default function GamePlay({ route, navigation }) {
   return (
     <SafeView>
       <ErrorWithRetry retry={getGame} message={errorMessage} error={error} />
-      <ScrollView contentContainerStyle={styles.gridsContainer}>
+
+      <ScrollView
+        contentContainerStyle={styles.gridsContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={getGame} />
+        }
+      >
+        <AppText
+          style={[
+            styles.text,
+            { color: !isUserToPlay ? colors.danger : colors.green },
+          ]}
+        >
+          {isUserToPlay ? "Your" : "Opponent's"} turn
+        </AppText>
         <AppText>Opponent's ships</AppText>
         <Grid grid={opponentGrid} onCellPress={onCellPress} />
         <AppText>Your ships</AppText>
@@ -140,5 +166,10 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     zIndex: 1,
     padding: 0,
+  },
+  text: {
+    fontSize: 20,
+    color: colors.green,
+    marginBottom: 20,
   },
 });
