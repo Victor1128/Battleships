@@ -9,6 +9,7 @@ import AppTextInput from "../components/AppTextInput";
 import colors from "../config/colors";
 import ListGames from "../components/ListGames";
 import { ref } from "yup";
+import AppButton from "../components/AppButton";
 
 export default function Games() {
   const navigation = useNavigation();
@@ -48,6 +49,17 @@ export default function Games() {
         ? result.data.games
         : result.data.games.filter((game) => game.status === "CREATED");
       setGames(filterGamesByText(localGames));
+    } else setErrorMessage(result.data.message);
+    setLoading(false);
+  };
+
+  const addGame = async () => {
+    setLoading(true);
+    const result = await gamesApi.addGame();
+    setError(!result.ok);
+    if (result.ok) {
+      console.log(result.data);
+      navigation.navigate("Configure Map", { id: result.data.id });
     } else setErrorMessage(result.data.message);
     setLoading(false);
   };
@@ -116,6 +128,12 @@ export default function Games() {
         playButtonCondition={(item) => !item.player2}
         onPress={handleJoinGame}
       />
+      <AppButton
+        icon="plus"
+        color="green"
+        style={styles.addButton}
+        onPress={addGame}
+      />
     </SafeView>
   );
 }
@@ -132,5 +150,15 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: "center",
     justifyContent: "center",
+  },
+  addButton: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    zIndex: 1,
+    padding: 0,
   },
 });
